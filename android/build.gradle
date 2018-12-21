@@ -23,5 +23,5 @@ dependencies {
     compile 'com.facebook.react:react-native:+'
     compile 'com.github.yalantis:ucrop:2.2.2-native'
     // compile 'id.zelory:compressor:2.1.1'
-    implementation 'com.github.wanxsb:Compressor:-SNAPSHOT'
+    compile 'com.github.wanxsb:Compressor:-SNAPSHOT'
 }
