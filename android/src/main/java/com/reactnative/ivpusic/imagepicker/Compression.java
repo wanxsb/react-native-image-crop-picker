@@ -24,6 +24,7 @@ class Compression {
         Integer maxWidth = options.hasKey("compressImageMaxWidth") ? options.getInt("compressImageMaxWidth") : null;
         Integer maxHeight = options.hasKey("compressImageMaxHeight") ? options.getInt("compressImageMaxHeight") : null;
         Double quality = options.hasKey("compressImageQuality") ? options.getDouble("compressImageQuality") : null;
+        boolean rgbMode = options.hasKey("compressWithRgbMode") ? options.getBoolean("compressWithRgbMode") : false;
 
         Boolean isLossLess = (quality == null || quality == 1.0);
         Boolean useOriginalWidth = (maxWidth == null || maxWidth >= bitmapOptions.outWidth);
@@ -59,6 +60,11 @@ class Compression {
         if (maxHeight != null) {
             Log.d("image-crop-picker", "Compressing image with max height " + maxHeight);
             compressor.setMaxHeight(maxHeight);
+        }
+
+        if(rgbMode) {
+            Log.d("image-crop-picker", "Compressing image with color mode " + rgbMode)
+            compressor.setColorMode(true);
         }
 
         File image = new File(originalImagePath); 
