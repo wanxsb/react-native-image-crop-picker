@@ -63,7 +63,7 @@ class Compression {
         }
 
         if(rgbMode) {
-            Log.d("image-crop-picker", "Compressing image with color mode " + rgbMode)
+            Log.d("image-crop-picker", "Compressing image with color mode " + rgbMode);
             compressor.setColorMode(true);
         }
 
