@@ -9,7 +9,7 @@ android {
         compileSdkVersion rootProject.hasProperty('compileSdkVersion') ? rootProject.compileSdkVersion : DEFAULT_COMPILE_SDK_VERSION
         buildToolsVersion rootProject.hasProperty('buildToolsVersion') ? rootProject.buildToolsVersion : DEFAULT_BUILD_TOOLS_VERSION
 
-  defaultConfig {
+    defaultConfig {
         minSdkVersion rootProject.hasProperty('minSdkVersion') ? rootProject.minSdkVersion : DEFAULT_MIN_SDK_VERSION
         targetSdkVersion rootProject.hasProperty('targetSdkVersion') ? rootProject.targetSdkVersion : DEFAULT_TARGET_SDK_VERSION
         versionCode 1
@@ -24,4 +24,5 @@ dependencies {
     compile 'com.github.yalantis:ucrop:2.2.2-native'
     // compile 'id.zelory:compressor:2.1.1'
     compile 'com.github.wanxsb:compressor-jitpack:4e5c296d16'
+    compile 'com.writingminds:FFmpegAndroid:0.3.2'
 }
