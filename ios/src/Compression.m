@@ -48,8 +48,8 @@
     
     CGFloat oldWidth = image.size.width;
     CGFloat oldHeight = image.size.height;
-    
-    CGFloat scaleFactor = (oldWidth > oldHeight) ? [maxWidth floatValue] / oldWidth : [maxHeight floatValue] / oldHeight;
+    //keep only one side in specified region
+    CGFloat scaleFactor = (oldWidth > oldHeight) ? [maxHeight floatValue] / oldHeight :  [maxWidth floatValue] / oldWidth;
     
     int newWidth = oldWidth * scaleFactor;
     int newHeight = oldHeight * scaleFactor;
