@@ -30,6 +30,28 @@
     return self;
 }
 
+- (ImageResult*) capturePosterImage:(NSURL *)inputURL seconds:(CGFloat)seconds {
+    AVURLAsset * urlAsset = [AVURLAsset URLAssetWithURL:inputURL options:nil];
+    AVAssetImageGenerator *imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:urlAsset];
+    NSError *error = nil;
+    CMTime time = CMTimeMake(seconds, 10);
+    CMTime actualTime;
+    CGImageRef cgImage = [imageGenerator copyCGImageAtTime:time actualTime:&actualTime error:&error];
+    if(error){
+        NSLog(@"截取视频图片失败:%@", error.localizedDescription);
+    }
+    CMTimeShow(actualTime);
+    UIImage *image = [UIImage imageWithCGImage:cgImage];
+    ImageResult * result = [[ImageResult alloc] init];
+    result.width = [NSNumber numberWithFloat:image.size.width];
+    result.height = [NSNumber numberWithFloat:image.size.height];
+    result.image = image;
+    CGImageRelease(cgImage);
+    result.data = UIImageJPEGRepresentation(result.image, 1.0);
+    result.mime = @"image/jpeg";
+    return result;
+}
+
 - (ImageResult*) compressImageDimensions:(UIImage*)image
                              withOptions:(NSDictionary*)options {
     NSNumber *maxWidth = [options valueForKey:@"compressImageMaxWidth"];

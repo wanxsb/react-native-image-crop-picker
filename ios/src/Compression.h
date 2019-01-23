@@ -31,7 +31,8 @@
             outputURL:(NSURL*)outputURL
           withOptions:(NSDictionary*)options
               handler:(void (^)(AVAssetExportSession*))handler;
-
+- (ImageResult*) capturePosterImage:(NSURL*)inputURL
+            seconds: (CGFloat)seconds;
 @property NSDictionary *exportPresets;
 
 @end

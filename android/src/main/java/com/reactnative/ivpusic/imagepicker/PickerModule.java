@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -439,7 +440,32 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
         return getImage(activity, path);
     }
 
-    private void getAsyncSelection(final Activity activity, Uri uri, boolean isCamera) throws Exception {
+    private int getQualifiedElemCount(ClipData clipData, final Activity activity, boolean isCamera, String mimeFilter) throws IOException {
+        int count = 0;
+        for (int i = 0; i < clipData.getItemCount(); i++) {
+            Uri uri = clipData.getItemAt(i).getUri();
+            if(getMimeFilterOfElem(activity, uri, isCamera) == mimeFilter) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    private String getMimeFilterOfElem(final Activity activity, Uri uri, boolean isCamera) throws IOException {
+        String path = resolveRealPath(activity, uri, isCamera);
+        if (path == null || path.isEmpty()) {
+            resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, "Cannot resolve asset path.");
+            return null;
+        }
+        String mime = getMimeType(path);
+        if(mime != null && mime.startsWith("video/")){
+            return "video";
+        }else {
+            return "image";
+        }
+    }
+
+    private void getAsyncSelection(final Activity activity, Uri uri, boolean isCamera, String mimeFilter) throws Exception {
         String path = resolveRealPath(activity, uri, isCamera);
         if (path == null || path.isEmpty()) {
             resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, "Cannot resolve asset path.");
@@ -447,12 +473,15 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
         }
 
         String mime = getMimeType(path);
-        if (mime != null && mime.startsWith("video/")) {
+        if ((mimeFilter == null || mimeFilter == "video") && mime != null && mime.startsWith("video/")) {
             getVideo(activity, path, mime);
             return;
+        }else if((mimeFilter == null || mimeFilter == "image") && (mime == null || !mime.startsWith("video/"))) {
+            resultCollector.notifySuccess(getImage(activity, path));
+        }else {
+            //Do nothing, skip
+            return;
         }
-
-        resultCollector.notifySuccess(getImage(activity, path));
     }
 
     private Bitmap validateVideo(String path) throws Exception {
@@ -490,7 +519,15 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                             video.putInt("size", (int) new File(videoPath).length());
                             video.putString("path", "file://" + videoPath);
                             video.putString("modificationDate", String.valueOf(modificationDate));
-
+                            final String posterFilePath =  getTmpDir(activity) + "/" + UUID.randomUUID().toString() + "_poster.jpg";
+                            File posterFile = createPosterImage(bmp, posterFilePath);
+                            WritableMap poster = new WritableNativeMap();
+                            poster.putInt("width", bmp.getWidth());
+                            poster.putInt("height", bmp.getHeight());
+                            poster.putInt("size", (int)posterFile.length());
+                            poster.putString("mime", "image/jpeg");
+                            poster.putString("path", "file://" + posterFile.getPath());
+                            video.putMap("poster", poster);
                             resultCollector.notifySuccess(video);
                         } catch (Exception e) {
                             resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, e);
@@ -505,6 +542,24 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                 }));
             }
         }).run();
+    }
+
+    private File createPosterImage(Bitmap bitmap, String posterImagePath) throws IOException{
+        FileOutputStream fileOutputStream = null;
+        File file = new File(posterImagePath).getParentFile();
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        try {
+            fileOutputStream = new FileOutputStream(posterImagePath);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+        } finally {
+            if (fileOutputStream != null) {
+                fileOutputStream.flush();
+                fileOutputStream.close();
+            }
+        }
+        return new File(posterImagePath);
     }
 
     private String resolveRealPath(Activity activity, Uri uri, boolean isCamera) throws IOException {
@@ -640,11 +695,14 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                     // only one image selected
                     if (clipData == null) {
                         resultCollector.setWaitCount(1);
-                        getAsyncSelection(activity, data.getData(), false);
+                        getAsyncSelection(activity, data.getData(), false, null);
                     } else {
-                        resultCollector.setWaitCount(clipData.getItemCount());
+                        String mimeFilter = getMimeFilterOfElem(activity, clipData.getItemAt(0).getUri(), false);
+                        resultCollector.setWaitCount(getQualifiedElemCount(clipData, activity, false, mimeFilter));
                         for (int i = 0; i < clipData.getItemCount(); i++) {
-                            getAsyncSelection(activity, clipData.getItemAt(i).getUri(), false);
+                            if((mimeFilter == "video" && i == 0) || mimeFilter != "video") {
+                                getAsyncSelection(activity, clipData.getItemAt(i).getUri(), false, mimeFilter);
+                            }
                         }
                     }
                 } catch (Exception ex) {
@@ -663,7 +721,7 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                     startCropping(activity, uri);
                 } else {
                     try {
-                        getAsyncSelection(activity, uri, false);
+                        getAsyncSelection(activity, uri, false, null);
                     } catch (Exception ex) {
                         resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
                     }

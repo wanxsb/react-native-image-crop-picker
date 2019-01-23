@@ -24,5 +24,4 @@ dependencies {
     compile 'com.github.yalantis:ucrop:2.2.2-native'
     // compile 'id.zelory:compressor:2.1.1'
     compile 'com.github.wanxsb:compressor-jitpack:4e5c296d16'
-    compile 'com.writingminds:FFmpegAndroid:0.3.2'
 }

@@ -7,13 +7,6 @@ import android.os.Environment;
 import android.util.Log;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableMap;
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
-
-
 import id.zelory.compressor.Compressor;
 import java.util.Arrays;
 import java.util.List;
@@ -83,69 +76,6 @@ class Compression {
     synchronized void compressVideo(final Activity activity, final ReadableMap options, final String originalVideo, final String compressedVideo, final Promise promise) {
         // todo: video compression
         // failed attempt 1: ffmpeg => slow and licensing issues
-        FFmpeg ffmpeg = FFmpeg.getInstance(activity.getApplicationContext());
-
-        try{
-            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
-
-                @Override
-                public void onStart() {
-                    Log.d(TAG, "start loading");
-                }
-
-                @Override
-                public void onFailure() {
-                    Log.d(TAG, "loading failure");
-                }
-
-                @Override
-                public void onSuccess() {
-                    Log.d(TAG, "loading success");
-                }
-
-                @Override
-                public void onFinish() {
-                    Log.d(TAG, "finished loading");
-                }
-
-            });
-            String cmd = "-i " + originalVideo + " -vcodec mpeg4 -s 300*200 " + compressedVideo;
-            String[] cmds = cmd.split(" ");
-            ffmpeg.execute(cmds, new FFmpegExecuteResponseHandler() {
-                @Override
-                public void onSuccess(String message) {
-                    Log.d(TAG, "execute success");
-                    promise.resolve(compressedVideo);
-                }
-
-                @Override
-                public void onProgress(String message) {
-                    Log.d(TAG, "execute onProcess");
-                }
-
-                @Override
-                public void onFailure(String message) {
-                    Log.d(TAG, "execute failure");
-                    promise.resolve(originalVideo);
-                }
-
-                @Override
-                public void onStart() {
-                    Log.d(TAG, "execute start");
-                }
-
-                @Override
-                public void onFinish() {
-                    Log.d(TAG, "execute finished");
-                }
-            });
-            return;
-        }catch (FFmpegNotSupportedException e){
-            Log.e(TAG, e.getMessage());
-            promise.resolve(originalVideo);
-        }catch (FFmpegCommandAlreadyRunningException e) {
-            Log.e(TAG, e.getMessage());
-            promise.resolve(originalVideo);
-        }
+        promise.resolve(originalVideo);
     }
 }
