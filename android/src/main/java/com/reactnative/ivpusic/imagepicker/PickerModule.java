@@ -447,7 +447,7 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
             if(getMimeFilterOfElem(activity, uri, isCamera) == mimeFilter) {
                 count += 1;
             }
-            if(mimeFilter == 'video') {
+            if(mimeFilter == "video") {
                 break;
             }
         }
