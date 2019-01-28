@@ -446,9 +446,9 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
             Uri uri = clipData.getItemAt(i).getUri();
             if(getMimeFilterOfElem(activity, uri, isCamera) == mimeFilter) {
                 count += 1;
-                if(mimeFilter == 'video') {
-                    break;
-                }
+            }
+            if(mimeFilter == 'video') {
+                break;
             }
         }
         return count;
@@ -521,6 +521,7 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                             video.putString("mime", mime);
                             video.putInt("size", (int) new File(videoPath).length());
                             video.putString("path", "file://" + videoPath);
+                            video.putInt("duration", getDuration(videoPath));
                             video.putString("modificationDate", String.valueOf(modificationDate));
                             final String posterFilePath =  getTmpDir(activity) + "/" + UUID.randomUUID().toString() + "_poster.jpg";
                             File posterFile = createPosterImage(bmp, posterFilePath);
@@ -545,6 +546,15 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                 }));
             }
         }).run();
+    }
+
+    private int getDuration(String videoPath) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(videoPath);
+        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        long timeInMillisec = Long.parseLong(time);
+        retriever.release();
+        return (int)Math.ceil(timeInMillisec/1000);
     }
 
     private File createPosterImage(Bitmap bitmap, String posterImagePath) throws IOException{
@@ -701,8 +711,7 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                         getAsyncSelection(activity, data.getData(), false, null);
                     } else {
                         String mimeFilter = getMimeFilterOfElem(activity, clipData.getItemAt(0).getUri(), false);
-                        resultCollector.setWaitCount(getQualifiedElemCount(clipData, activity, false, mimeFilter));    
-                        
+                        resultCollector.setWaitCount(getQualifiedElemCount(clipData, activity, false, mimeFilter));
                         for (int i = 0; i < clipData.getItemCount(); i++) {
                             if((mimeFilter == "video" && i == 0) || mimeFilter != "video") {
                                 getAsyncSelection(activity, clipData.getItemAt(i).getUri(), false, mimeFilter);
