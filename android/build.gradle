@@ -25,4 +25,5 @@ dependencies {
     // compile 'id.zelory:compressor:2.1.1'
     compile 'com.github.wanxsb:compressor-jitpack:4e5c296d16'
     compile 'net.ypresto.androidtranscoder:android-transcoder:0.2.0'
+    compile 'net.ypresto.qtfaststartjava:qtfaststart:0.1.0'
 }

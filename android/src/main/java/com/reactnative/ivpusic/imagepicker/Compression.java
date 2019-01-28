@@ -4,9 +4,15 @@ import android.app.Activity;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableMap;
+
+import net.ypresto.androidtranscoder.MediaTranscoder;
+import net.ypresto.androidtranscoder.format.MediaFormatStrategy;
+import net.ypresto.androidtranscoder.format.MediaFormatStrategyPresets;
+
 import id.zelory.compressor.Compressor;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +25,7 @@ import java.io.IOException;
  */
 
 class Compression {
-
+    private static final String TAG = "image-crop-picker";
     File compressImage(final Activity activity, final ReadableMap options, final String originalImagePath, final BitmapFactory.Options bitmapOptions) throws IOException {
         Integer maxWidth = options.hasKey("compressImageMaxWidth") ? options.getInt("compressImageMaxWidth") : null;
         Integer maxHeight = options.hasKey("compressImageMaxHeight") ? options.getInt("compressImageMaxHeight") : null;
@@ -37,27 +43,27 @@ class Compression {
             return new File(originalImagePath);
         }
 
-        Log.d("image-crop-picker", "Image compression activated");
+        Log.d(TAG, "Image compression activated");
         Compressor compressor = new Compressor(activity)
                 .setCompressFormat(Bitmap.CompressFormat.JPEG)
                 .setDestinationDirectoryPath(Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES).getAbsolutePath());
 
         if (quality == null) {
-            Log.d("image-crop-picker", "Compressing image with quality 100");
+            Log.d(TAG, "Compressing image with quality 100");
             compressor.setQuality(100);
         } else {
-            Log.d("image-crop-picker", "Compressing image with quality " + (quality * 100));
+            Log.d(TAG, "Compressing image with quality " + (quality * 100));
             compressor.setQuality((int) (quality * 100));
         }
 
         if (maxWidth != null) {
-            Log.d("image-crop-picker", "Compressing image with max width " + maxWidth);
+            Log.d(TAG, "Compressing image with max width " + maxWidth);
             compressor.setMaxWidth(maxWidth);
         }
 
         if (maxHeight != null) {
-            Log.d("image-crop-picker", "Compressing image with max height " + maxHeight);
+            Log.d(TAG, "Compressing image with max height " + maxHeight);
             compressor.setMaxHeight(maxHeight);
         }
 
@@ -76,6 +82,39 @@ class Compression {
     synchronized void compressVideo(final Activity activity, final ReadableMap options, final String originalVideo, final String compressedVideo, final Promise promise) {
         // todo: video compression
         // failed attempt 1: ffmpeg => slow and licensing issues
-        promise.resolve(originalVideo);
+        final long startTime = SystemClock.uptimeMillis();
+        MediaTranscoder.Listener listener = new MediaTranscoder.Listener() {
+            @Override
+            public void onTranscodeProgress(double progress) {
+                Log.d(TAG, "transcode progress " + progress);
+            }
+
+            @Override
+            public void onTranscodeCompleted() {
+                Log.d(TAG, "transcoding took " + (SystemClock.uptimeMillis() - startTime) + "ms");
+                promise.resolve(compressedVideo);
+            }
+
+            @Override
+            public void onTranscodeCanceled() {
+                Log.e(TAG, "onTranscodeCanceled");
+                promise.reject(TAG, "transcode was canceled");
+            }
+
+            @Override
+            public void onTranscodeFailed(Exception exception) {
+                exception.printStackTrace();
+                Log.e(TAG, exception.getMessage());
+                promise.reject(TAG, exception.getMessage());
+            }
+        };
+        try {
+            MediaTranscoder.getInstance().transcodeVideo(originalVideo, compressedVideo, MediaFormatStrategyPresets.createAndroid720pStrategy(2000 * 1000, 128 * 1000, 1), listener);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
+            promise.reject(TAG, e.getMessage());
+        }
+
     }
 }
