@@ -446,6 +446,9 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
             Uri uri = clipData.getItemAt(i).getUri();
             if(getMimeFilterOfElem(activity, uri, isCamera) == mimeFilter) {
                 count += 1;
+                if(mimeFilter == 'video') {
+                    break;
+                }
             }
         }
         return count;
@@ -698,7 +701,8 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
                         getAsyncSelection(activity, data.getData(), false, null);
                     } else {
                         String mimeFilter = getMimeFilterOfElem(activity, clipData.getItemAt(0).getUri(), false);
-                        resultCollector.setWaitCount(getQualifiedElemCount(clipData, activity, false, mimeFilter));
+                        resultCollector.setWaitCount(getQualifiedElemCount(clipData, activity, false, mimeFilter));    
+                        
                         for (int i = 0; i < clipData.getItemCount(); i++) {
                             if((mimeFilter == "video" && i == 0) || mimeFilter != "video") {
                                 getAsyncSelection(activity, clipData.getItemAt(i).getUri(), false, mimeFilter);

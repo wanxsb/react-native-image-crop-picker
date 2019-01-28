@@ -527,11 +527,11 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
         [self showActivityIndicator:^(UIActivityIndicatorView *indicatorView, UIView *overlayView) {
             NSLock *lock = [[NSLock alloc] init];
             __block int processed = 0;
-            PHAssetMediaType phAssetMediaType;
+            PHAssetMediaType phAssetMediaType = -1;
             
             for (PHAsset *phAsset in assets) {
                 
-                if ((!phAssetMediaType || phAssetMediaType == PHAssetMediaTypeVideo) && phAsset.mediaType == PHAssetMediaTypeVideo) {
+                if ((phAssetMediaType == -1 || phAssetMediaType == PHAssetMediaTypeVideo) && phAsset.mediaType == PHAssetMediaTypeVideo) {
                     phAssetMediaType = PHAssetMediaTypeVideo;
                     [self getVideoAsset:phAsset completion:^(NSDictionary* video) {
                         dispatch_async(dispatch_get_main_queue(), ^{
@@ -560,7 +560,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
                             }
                         });
                     }];
-                } else if((!phAssetMediaType || (phAssetMediaType != PHAssetMediaTypeVideo)) && phAsset.mediaType != PHAssetMediaTypeVideo) {
+                } else if((phAssetMediaType == -1 || (phAssetMediaType != PHAssetMediaTypeVideo)) && phAsset.mediaType != PHAssetMediaTypeVideo) {
                     phAssetMediaType = phAsset.mediaType;
                     [manager
                      requestImageDataForAsset:phAsset
