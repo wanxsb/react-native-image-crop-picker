@@ -441,7 +441,7 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
                  ImageResult * poster = [[self compression] capturePosterImage:outputURL seconds:0];
                  AVAssetTrack *track = [[compressedAsset tracksWithMediaType:AVMediaTypeVideo] firstObject];
                  CMTime durationTime = compressedAsset.duration;
-                 int durationSeconds = ceil(durationTime.value/durationTime.timescale);
+                 int durationSeconds = ceil(durationTime.value * 1.0/durationTime.timescale);
                  NSNumber *fileSizeValue = nil;
                  [outputURL getResourceValue:&fileSizeValue
                                       forKey:NSURLFileSizeKey

@@ -555,7 +555,7 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
         String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         long timeInMillisec = Long.parseLong(time);
         retriever.release();
-        return (int)Math.ceil(timeInMillisec/1000);
+        return (int)Math.ceil(timeInMillisec * 1.0f/1000);
     }
 
     private File createPosterImage(Bitmap bitmap, String posterImagePath) throws IOException{
