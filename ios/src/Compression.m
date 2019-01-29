@@ -47,7 +47,7 @@
     result.height = [NSNumber numberWithFloat:image.size.height];
     result.image = image;
     CGImageRelease(cgImage);
-    result.data = UIImageJPEGRepresentation(result.image, 1.0);
+    result.data = UIImageJPEGRepresentation(result.image, 0.8);
     result.mime = @"image/jpeg";
     return result;
 }
@@ -115,7 +115,7 @@
     
     NSString *preset = [self.exportPresets valueForKey:presetKey];
     if (preset == nil) {
-        preset = AVAssetExportPresetMediumQuality;
+        preset = AVAssetExportPreset640x480;
     }
     
     [[NSFileManager defaultManager] removeItemAtURL:outputURL error:nil];
