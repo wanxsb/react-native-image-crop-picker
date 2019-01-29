@@ -11,7 +11,6 @@ import com.facebook.react.bridge.ReadableMap;
 
 import net.ypresto.androidtranscoder.MediaTranscoder;
 import net.ypresto.androidtranscoder.format.MediaFormatStrategy;
-import net.ypresto.qtfaststart.QtFastStart;
 
 import id.zelory.compressor.Compressor;
 
@@ -80,7 +79,7 @@ class Compression {
                 .compressToFile(image, compressedFileName);
     }
 
-    synchronized void compressVideo(final Activity activity, final ReadableMap options, final String originalVideo, final String tempVideoPath, final String compressedVideo, final Promise promise) {
+    synchronized void compressVideo(final Activity activity, final ReadableMap options, final String originalVideo, final String compressedVideo, final Promise promise) {
         // todo: video compression
         // failed attempt 1: ffmpeg => slow and licensing issues
         final long startTime = SystemClock.uptimeMillis();
@@ -93,25 +92,7 @@ class Compression {
             @Override
             public void onTranscodeCompleted() {
                 Log.d(TAG, "transcoding took " + (SystemClock.uptimeMillis() - startTime) + "ms");
-                try{
-                    File inFile = new File(tempVideoPath);
-                    File outFile = new File(compressedVideo);
-                    QtFastStart.fastStart(inFile, outFile);
-                    promise.resolve(compressedVideo);
-                }catch (QtFastStart.MalformedFileException e){
-                    e.printStackTrace();
-                    Log.e(TAG, e.getMessage());
-                    promise.reject(TAG, e.getMessage());
-                }catch(QtFastStart.UnsupportedFileException e){
-                    e.printStackTrace();
-                    Log.e(TAG, e.getMessage());
-                    promise.reject(TAG, e.getMessage());
-                }catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, e.getMessage());
-                    promise.reject(TAG, e.getMessage());
-                }
-
+                promise.resolve(compressedVideo);
             }
 
             @Override
@@ -128,8 +109,8 @@ class Compression {
             }
         };
         try {
-            MediaFormatStrategy mediaFormatStrategy = new Android640x360FormatStrategy();
-            MediaTranscoder.getInstance().transcodeVideo(originalVideo, tempVideoPath, mediaFormatStrategy, listener);
+            MediaFormatStrategy mediaFormatStrategy = new Android640x360FormatStrategy(500*1000, 128*1000, 1);
+            MediaTranscoder.getInstance().transcodeVideo(originalVideo, compressedVideo, mediaFormatStrategy, listener);
         }catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, e.getMessage());

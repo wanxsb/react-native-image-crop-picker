@@ -501,13 +501,12 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
 
     private void getVideo(final Activity activity, final String path, final String mime) throws Exception {
         validateVideo(path);
-        final String tempVideoPath = getTmpDir(activity) + "/" + UUID.randomUUID().toString() + ".mp4";
         final String compressedVideoPath = getTmpDir(activity) + "/" + UUID.randomUUID().toString() + ".mp4";
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                compression.compressVideo(activity, options, path, tempVideoPath, compressedVideoPath, new PromiseImpl(new Callback() {
+                compression.compressVideo(activity, options, path, compressedVideoPath, new PromiseImpl(new Callback() {
                     @Override
                     public void invoke(Object... args) {
                         String videoPath = (String) args[0];
