@@ -33,6 +33,7 @@
 - (ImageResult*) capturePosterImage:(NSURL *)inputURL seconds:(CGFloat)seconds {
     AVURLAsset * urlAsset = [AVURLAsset URLAssetWithURL:inputURL options:nil];
     AVAssetImageGenerator *imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:urlAsset];
+    imageGenerator.appliesPreferredTrackTransform = true;
     NSError *error = nil;
     CMTime time = CMTimeMake(seconds, 10);
     CMTime actualTime;
@@ -47,7 +48,7 @@
     result.height = [NSNumber numberWithFloat:image.size.height];
     result.image = image;
     CGImageRelease(cgImage);
-    result.data = UIImageJPEGRepresentation(result.image, 0.8);
+    result.data = UIImageJPEGRepresentation(image, 0.8);
     result.mime = @"image/jpeg";
     return result;
 }
